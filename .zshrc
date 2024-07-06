@@ -21,12 +21,54 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
+zinit load asdf-vm/asdf
+
+# Theme
+GEOMETRY_COLOR_DIR=152
+zinit ice wait"0" lucid atload"geometry::prompt"
+zinit light geometry-zsh/geometry
+
+zinit ice pick"async.zsh" src"pure.zsh"
+zinit light sindresorhus/pure
+
+zinit light mafredri/zsh-async  # dependency
+zinit ice svn silent atload'prompt sorin'
+zinit snippet PZT::modules/prompt
+
+zinit ice atload"fpath+=( \$PWD );"
+zinit light chauncey-garrett/zsh-prompt-garrett
+zinit ice svn atload"prompt garrett" silent
+zinit snippet PZT::modules/prompt
+
+zinit ice wait'!' lucid nocompletions \
+         compile"{zinc_functions/*,segments/*,zinc.zsh}" \
+         atload'!prompt_zinc_setup; prompt_zinc_precmd'
+zinit load robobenklein/zinc
+
+# ZINC git info is already async, but if you want it
+# even faster with gitstatus in Turbo mode:
+# https://github.com/romkatv/gitstatus
+zinit ice wait'1' atload'zinc_optional_depenency_loaded'
+zinit load romkatv/gitstatus
+
+# After finishing the configuration wizard change the atload'' ice to:
+# -> atload'source ~/.p10k.zsh; _p9k_precmd'
+zinit ice wait'!' lucid atload'true; _p9k_precmd' nocd
+zinit light romkatv/powerlevel10k
+
 
 # Add in snippets
-zinit snippet OMZP::git
+#zinit snippet OMZP::git
+
+. "$HOME/.asdf/asdf.sh"
+
+# append completions to fpath
+fpath=(${ASDF_DIR}/completions $fpath)
+# initialise completions with ZSH's compinit
+autoload -Uz compinit && compinit
 
 # Load completions
-autoload -U compinit && compinit
+#autoload -U compinit && compinit
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -59,6 +101,22 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 # Aliases
 alias ls='ls --color'
 alias vim='nvim'
+alias bat='batcat'
+alias fd='fdfind'
 
 # Shell integrations
 # eval "$(zoxide init --cmd cd zsh)"
+source <(fzf --zsh)
+
+. ~/.asdf/plugins/golang/set-env.zsh
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)
+
+# pnpm
+export PNPM_HOME="/home/james/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
